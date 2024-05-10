@@ -59,7 +59,7 @@ function UploadContainer() {
         <h1>Image loading....</h1>
       ) : (
         <>
-          <label htmlFor="input-image">
+          <label htmlFor="input-image" className="w-[80%] sm:w-1/2 object-cover">
             <input
               type="file"
               onChange={handleFileUpload}

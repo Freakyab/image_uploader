@@ -6,12 +6,16 @@ import { ToastContainer } from "react-toastify";
 import { handleToast } from "./HandleToast";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { FaDownload } from "react-icons/fa6";
+import { CiLink, CiShare2 } from "react-icons/ci";
+import { MdDelete } from "react-icons/md";
 
 function ViewImage() {
   const [allImage, setAllImage] = useState<imageProps[]>([]);
   const [imagefetch, setImagefetch] = useState<boolean>(true);
   const [filteredImages, setFilteredImages] = useState<imageProps[]>([]);
   const [search, setSearch] = useState<string>("");
+  const [hover, setHover] = useState(false);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -70,6 +74,17 @@ function ViewImage() {
       }
     }
   };
+
+  const onHover = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    e.preventDefault();
+    setHover(true); // turn true
+    console.log("hovered");
+  };
+
+  const onHoverOver = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    e.preventDefault(); // turn false
+    setHover(false);
+  };
   return (
     <div className="bg-white w-[90%] h-full p-4 rounded-lg shadow-xl">
       {imagefetch ? (
@@ -85,43 +100,48 @@ function ViewImage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
             {filteredImages.length > 0 ? (
               filteredImages.map((image, index) => (
-                <div key={index} className="grid gap-2">
+                <div
+                  key={index}
+                  className="grid gap-2 justify-center w-fit border-4 relative border-black rounded-md">
+                  {/* {hover && <p className={hover ? "absolute z-10 backdrop-filter backdrop-blur-sm text-white h-20 p-3 transition-all duration-100000" : "hidden"}> {image.image} </p>} */}
                   <Image
+                    // onMouseEnter={(e) => onHover(e)}
+                    // onMouseLeave={(e) => onHoverOver(e)}
                     src={image.link.toString()}
                     alt={image.image.toString()}
-                    width={300}
-                    height={300}
-                    className="rounded-md shadow-xl"
+                    width={1500}
+                    height={1500}
+                    className="border-b-2 border-black shadow-sm object-cover w-[350px] h-[400px]"
                   />
-
-                  <p className="text-black">{image.image}</p>
-                  <div className="flex gap-2">
+                  <p className="text-center capitalize ">{image.image}</p>
+                  <div className="flex justify-evenly py-3 border-t-4  bottom-0 border-black">
                     <p
                       className="text-blue-500 cursor-pointer"
                       onClick={() => download(image)}>
-                      download
+                      <FaDownload size={30} />
                     </p>
                     <p
                       className="text-blue-500 cursor-pointer"
                       onClick={() => {
-                        router.push("/getImageLink/" + image.id);
+                        handleToast("Opening to new tab", "info");
+                        router.push("/getImage/" + image.id);
                       }}>
-                      share
+                      <CiShare2 size={30} />
                     </p>
                     <p
                       className="text-blue-500 cursor-pointer"
                       onClick={() => {
                         navigator.clipboard.writeText(
-                          "http://localhost:3000/api/getImage/" + image.id
+                          "https://imageuploaderfreakyab.vercel.app/api/getImage/" + image.id
                         );
                         handleToast("Link copied to clipboard", "success");
                       }}>
-                      get link
+                      <CiLink size={30} />
                     </p>
                     <span
                       className="text-red-500 cursor-pointer"
                       onClick={() => handleDelete(image)}>
-                      delete
+                      <MdDelete size={30} />
                     </span>
                   </div>
                 </div>
