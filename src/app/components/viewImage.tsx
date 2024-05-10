@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { getImages, deleteImage } from "@/app/actions/uploader";
+import { getImages, deleteImage, totalLength } from "@/app/actions/uploader";
 import { ToastContainer } from "react-toastify";
 import { handleToast } from "./HandleToast";
 import Image from "next/image";
@@ -22,16 +22,23 @@ function ViewImage() {
     if (imagefetch) {
       const fetchImages = async () => {
         console.time("fetch images");
-        const images = await getImages();
-        if (images) {
-          setAllImage(images);
-          setImagefetch(false);
-        } else if (!images) {
-          handleToast("Error fetching images", "error");
+        let index = 0;
+        let fetchedImages : imageProps[] = [];
+        let length = await totalLength(); // Assuming this function gives the total length of images
+  
+        while (index < length) {
+          const images = await getImages(index);
+          if (images) {
+            fetchedImages = [...fetchedImages, ...images];
+          }
+          index += 2; // Increment index for pagination
         }
-        // time in sec to fetch images
+  
+        setAllImage(fetchedImages);
+        setImagefetch(false);
         console.timeEnd("fetch images");
       };
+  
       fetchImages();
     }
   }, [imagefetch]);
@@ -132,7 +139,8 @@ function ViewImage() {
                       className="text-blue-500 cursor-pointer"
                       onClick={() => {
                         navigator.clipboard.writeText(
-                          "https://imageuploaderfreakyab.vercel.app/api/getImage/" + image.id
+                          "https://imageuploaderfreakyab.vercel.app/api/getImage/" +
+                            image.id
                         );
                         handleToast("Link copied to clipboard", "success");
                       }}>
