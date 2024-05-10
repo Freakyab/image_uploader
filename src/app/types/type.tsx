@@ -1,4 +1,5 @@
 type imageProps = {
-    image : String,
-    link : String
+    id : string,
+    image : string,
+    link : string
 }
