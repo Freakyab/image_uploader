@@ -33,10 +33,7 @@ export async function getImages(index: number): Promise<imageProps[] | false> {
 
 export async function totalLength(){
     try {
-        // if (index === 0) then return last 2 images
-        // else total size  - index images slice 2 images
         const images = await db.imageUploader.findMany();
-
         return images.length;
     } catch (err) {
         console.error(err);

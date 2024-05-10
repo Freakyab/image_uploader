@@ -15,6 +15,7 @@ function ViewImage() {
   const [imagefetch, setImagefetch] = useState<boolean>(true);
   const [filteredImages, setFilteredImages] = useState<imageProps[]>([]);
   const [search, setSearch] = useState<string>("");
+  const [loadingString, setLoadingString] = useState<string>("");
   const [hover, setHover] = useState(false);
   const router = useRouter();
 
@@ -25,8 +26,8 @@ function ViewImage() {
         let index = 0;
         let fetchedImages : imageProps[] = [];
         let length = await totalLength(); // Assuming this function gives the total length of images
-  
         while (index < length) {
+          setLoadingString(`Image fetch.. (${index}/${length})`);
           const images = await getImages(index);
           if (images) {
             fetchedImages = [...fetchedImages, ...images];
@@ -95,7 +96,7 @@ function ViewImage() {
   return (
     <div className="bg-white w-[90%] h-full p-4 rounded-lg shadow-xl">
       {imagefetch ? (
-        <h1>Image loading....</h1>
+        <h1 className="text-black">{loadingString ? loadingString : "loading....."}</h1>
       ) : (
         <>
           <input
@@ -122,20 +123,20 @@ function ViewImage() {
                   />
                   <p className="text-center capitalize ">{image.image}</p>
                   <div className="flex justify-evenly py-3 border-t-4  bottom-0 border-black">
-                    <p
+                    <button
                       className="text-blue-500 cursor-pointer"
                       onClick={() => download(image)}>
                       <FaDownload size={30} />
-                    </p>
-                    <p
+                    </button>
+                    <button
                       className="text-blue-500 cursor-pointer"
                       onClick={() => {
                         handleToast("Opening to new tab", "info");
                         router.push("/getImage/" + image.id);
                       }}>
                       <CiShare2 size={30} />
-                    </p>
-                    <p
+                    </button>
+                    <button
                       className="text-blue-500 cursor-pointer"
                       onClick={() => {
                         navigator.clipboard.writeText(
@@ -145,12 +146,12 @@ function ViewImage() {
                         handleToast("Link copied to clipboard", "success");
                       }}>
                       <CiLink size={30} />
-                    </p>
-                    <span
+                    </button>
+                    <button
                       className="text-red-500 cursor-pointer"
                       onClick={() => handleDelete(image)}>
                       <MdDelete size={30} />
-                    </span>
+                    </button>
                   </div>
                 </div>
               ))
