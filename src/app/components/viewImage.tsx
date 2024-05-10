@@ -34,7 +34,7 @@ function ViewImage() {
           index += 2; // Increment index for pagination
         }
   
-        setAllImage(fetchedImages);
+        setAllImage(fetchedImages.reverse());
         setImagefetch(false);
         console.timeEnd("fetch images");
       };

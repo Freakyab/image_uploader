@@ -24,8 +24,7 @@ export async function getImages(index: number): Promise<imageProps[] | false> {
         take: 2, // Take 2 images per request (pagination)
       });
       
-      console.log(images);
-      return images.reverse(); // Reverse the order if needed
+      return images; // Reverse the order if needed
     } catch (err) {
       console.error(err);
       return false;
