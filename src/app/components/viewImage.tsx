@@ -128,10 +128,10 @@ function ViewImage() {
               className="border-2 border-gray-300 p-2 rounded-md my-3"
             />
           ) : null}
-          {filteredImages.filter((image) => image.visibility).length > 0 ||
-          userType == "AdminUser" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
-              {filteredImages.map((image, index) => (
+          <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
+            {filteredImages.map((image, index) =>
+              filteredImages.filter((image) => image.visibility).length > 0 ||
+              userType == "AdminUser" ? (
                 <div
                   key={index}
                   className="grid gap-2 justify-center w-fit border-4 relative border-black rounded-md">
@@ -194,11 +194,9 @@ function ViewImage() {
                     </>
                   ) : null}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <h1>No images found</h1>
-          )}
+              ) : null
+            )}
+          </div>
         </>
       )}
       <ToastContainer />
