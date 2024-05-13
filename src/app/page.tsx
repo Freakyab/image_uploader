@@ -6,6 +6,16 @@ import ViewImage from "./components/viewImage";
 
 export default function Home() {
   const [viewType, setViewType] = useState<boolean>(true);
+  const [userType, setUserType] = useState<string>("");
+
+  React.useEffect(() => {
+    const type = localStorage.getItem('userTypeOfUploader');
+    if (type) {
+      // console.log("User type:", type);
+      setUserType(type);
+    }
+  }, []);
+ 
   return (
     <main
       className="min-h-screen min-w-screen flex flex-col justify-center items-center bg-black">

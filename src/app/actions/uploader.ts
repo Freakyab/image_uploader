@@ -6,7 +6,8 @@ export async function ImageUploadFile(link: string, name: string) {
         await db.imageUploader.create({
             data: {
                 image: name,
-                link: link
+                link: link,
+                visibility: true
             }
         })
 
@@ -42,31 +43,23 @@ export async function totalLength(){
 }
 
 
-// Function to calculate the total size of images
-async function calculateSize(images: imageProps[]): Promise<number> {
-    let totalSize = 0;
-    let index = 0;
-    for (const image of images) {
-        // Assuming each image object has an ID and you fetch the document size from the database
-        const document = await db.imageUploader.findUnique({ where: { id: image.id } });
-        totalSize += calculateDocumentSize(document);
-        index++;
-        if (totalSize > 4 * 1024 * 1024) {
-            break;
-        }
+export async function changeVisibility(id: string, visibility: boolean) {
+    try {
+        const change = await db.imageUploader.update({
+            where: {
+                id: id
+            },
+            data: {
+                visibility: visibility
+            }
+        })
+        if(change) return true;
+        else return false;
+    } catch (err) {
+        console.log(err);
+        return false;
     }
-
-    return index;
 }
-
-// Function to calculate the size of the document
-function calculateDocumentSize(document: any): number {
-    // Implement your logic to calculate the size of the document
-    // For example, you can convert the document to a string and calculate its length
-    const documentString = JSON.stringify(document);
-    return Buffer.byteLength(documentString, 'utf-8');
-}
-
 
 export async function deleteImage(id: string) {
     try {

@@ -1,14 +1,18 @@
 "use client";
-
 import React, { useState } from "react";
-import { getImages, deleteImage, totalLength } from "@/app/actions/uploader";
+import {
+  getImages,
+  deleteImage,
+  totalLength,
+  changeVisibility,
+} from "@/app/actions/uploader";
 import { ToastContainer } from "react-toastify";
 import { handleToast } from "./HandleToast";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { FaDownload } from "react-icons/fa6";
 import { CiLink, CiShare2 } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 function ViewImage() {
   const [allImage, setAllImage] = useState<imageProps[]>([]);
@@ -16,15 +20,21 @@ function ViewImage() {
   const [filteredImages, setFilteredImages] = useState<imageProps[]>([]);
   const [search, setSearch] = useState<string>("");
   const [loadingString, setLoadingString] = useState<string>("");
-  const [hover, setHover] = useState(false);
-  const router = useRouter();
+  const [userType, setUserType] = useState<string>("");
+
+  React.useEffect(() => {
+    const type = localStorage.getItem("userTypeOfUploader");
+    if (type) {
+      setUserType(type);
+    }
+  }, []);
 
   React.useEffect(() => {
     if (imagefetch) {
       const fetchImages = async () => {
         console.time("fetch images");
         let index = 0;
-        let fetchedImages : imageProps[] = [];
+        let fetchedImages: imageProps[] = [];
         let length = await totalLength(); // Assuming this function gives the total length of images
         while (index < length) {
           setLoadingString(`Image fetch.. (${index}/${length})`);
@@ -34,12 +44,13 @@ function ViewImage() {
           }
           index += 2; // Increment index for pagination
         }
-  
+
         setAllImage(fetchedImages.reverse());
+        console.log("All images:", fetchedImages.reverse());
         setImagefetch(false);
         console.timeEnd("fetch images");
       };
-  
+
       fetchImages();
     }
   }, [imagefetch]);
@@ -83,20 +94,24 @@ function ViewImage() {
     }
   };
 
-  const onHover = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-    e.preventDefault();
-    setHover(true); // turn true
-    console.log("hovered");
-  };
+  const handleVisiblity = async (file: imageProps) => {
+    if (file.id) {
+      setImagefetch(true);
+      const isVisibility = await changeVisibility(file.id, !file.visibility);
+      if (isVisibility) {
+        handleToast("visibility changed", "success");
+      } else {
+        handleToast("visibility not changed", "error");
+      }
+    }
+  }
 
-  const onHoverOver = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-    e.preventDefault(); // turn false
-    setHover(false);
-  };
   return (
     <div className="bg-white w-[90%] h-full p-4 rounded-lg shadow-xl">
       {imagefetch ? (
-        <h1 className="text-black">{loadingString ? loadingString : "loading....."}</h1>
+        <h1 className="text-black">
+          {loadingString ? loadingString : "loading....."}
+        </h1>
       ) : (
         <>
           <input
@@ -111,10 +126,7 @@ function ViewImage() {
                 <div
                   key={index}
                   className="grid gap-2 justify-center w-fit border-4 relative border-black rounded-md">
-                  {/* {hover && <p className={hover ? "absolute z-10 backdrop-filter backdrop-blur-sm text-white h-20 p-3 transition-all duration-100000" : "hidden"}> {image.image} </p>} */}
                   <Image
-                    // onMouseEnter={(e) => onHover(e)}
-                    // onMouseLeave={(e) => onHoverOver(e)}
                     src={image.link.toString()}
                     alt={image.image.toString()}
                     width={1500}
@@ -131,8 +143,10 @@ function ViewImage() {
                     <button
                       className="text-blue-500 cursor-pointer"
                       onClick={() => {
-                        handleToast("Opening to new tab", "info");
-                        router.push("/getImage/" + image.id);
+                        window.open(
+                          "https://imageuploaderfreakyab.vercel.app/getImage/" +
+                            image.id
+                        );
                       }}>
                       <CiShare2 size={30} />
                     </button>
@@ -152,6 +166,19 @@ function ViewImage() {
                       onClick={() => handleDelete(image)}>
                       <MdDelete size={30} />
                     </button>
+                    {userType === "AdminUser" && (
+                      <>
+                        <button
+                          className="cursor-pointer"
+                          onClick={()=>handleVisiblity(image)}>
+                          {image.visibility ? (
+                            <FaRegEye size={30} />
+                          ) : (
+                            <FaRegEyeSlash size={30} />
+                          )}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))

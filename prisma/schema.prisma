@@ -17,4 +17,5 @@ model ImageUploader {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   image String
   link String
+  visibility Boolean
 }
