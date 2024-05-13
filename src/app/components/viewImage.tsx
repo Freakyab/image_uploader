@@ -47,7 +47,6 @@ function ViewImage() {
         }
 
         setAllImage(fetchedImages.reverse());
-        console.log("All images:", fetchedImages.reverse());
         setImagefetch(false);
         console.timeEnd("fetch images");
       };
@@ -72,7 +71,6 @@ function ViewImage() {
       console.error("Invalid imageProps:", e);
       return;
     }
-    console.log("Downloading image:", e.image, e.link);
     const downloadLink = document.createElement("a");
     downloadLink.href = e.link;
     downloadLink.download = e.image;
@@ -130,10 +128,10 @@ function ViewImage() {
               className="border-2 border-gray-300 p-2 rounded-md my-3"
             />
           ) : null}
-          <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
-            {filteredImages.filter((image) => image.visibility).length > 0 ||
-            userType == "AdminUser" ? (
-              filteredImages.map((image, index) => (
+          {filteredImages.filter((image) => image.visibility).length > 0 ||
+          userType == "AdminUser" ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
+              {filteredImages.map((image, index) => (
                 <div
                   key={index}
                   className="grid gap-2 justify-center w-fit border-4 relative border-black rounded-md">
@@ -196,11 +194,11 @@ function ViewImage() {
                     </>
                   ) : null}
                 </div>
-              ))
-            ) : (
-              <h1>No images found</h1>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <h1>No images found</h1>
+          )}
         </>
       )}
       <ToastContainer />
