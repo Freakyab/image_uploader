@@ -25,7 +25,6 @@ function ViewImage() {
   React.useEffect(() => {
     const type = localStorage.getItem("userTypeOfUploader");
     if (type) {
-      console.log("User type:", type);
       setUserType(type);
     }
   }, []);
@@ -45,8 +44,12 @@ function ViewImage() {
           }
           index += 2; // Increment index for pagination
         }
-
-        setAllImage(fetchedImages.reverse());
+        if (localStorage.getItem("userTypeOfUploader") !== "AdminUser") {
+          console.log("Fetched images:", fetchedImages);
+          setAllImage(
+            fetchedImages.filter((image) => image.visibility).reverse()
+          );
+        } else setAllImage(fetchedImages.reverse());
         setImagefetch(false);
         console.timeEnd("fetch images");
       };
@@ -93,7 +96,7 @@ function ViewImage() {
     }
   };
 
-  const handleVisiblity = async (image: imageProps) => {
+  const handleVisibility = async (image: imageProps) => {
     const id = image.id;
     const visibility = image.visibility;
     const success = await changeVisibility(id, !visibility);
@@ -112,54 +115,53 @@ function ViewImage() {
     }
   };
   return (
-    <div className="bg-white w-[90%] h-full p-4 rounded-lg shadow-xl">
+    <div className="bg-white md:w-[90%] w-full h-full p-4 rounded-lg shadow-xl">
       {imagefetch ? (
         <h1 className="text-black">
-          {loadingString ? loadingString : "loading....."}
+          {loadingString ? loadingString : "Loading....."}
         </h1>
       ) : (
         <>
-          {filteredImages.filter((image) => image.visibility).length > 0 ||
-          userType == "AdminUser" ? (
+          {filteredImages.length > 0 || userType == "AdminUser" ? (
             <input
               type="text"
-              placeholder="find the image by name"
+              placeholder="Find the image by name"
               onChange={handleSearch}
-              className="border-2 border-gray-300 p-2 rounded-md my-3"
+              className="border-2 border-gray-300 p-2 rounded-md my-3 w-full"
             />
           ) : null}
-          <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
-            {filteredImages.map((image, index) =>
-              filteredImages.filter((image) => image.visibility).length > 0 ||
-              userType == "AdminUser" ? (
+
+          <div className="grid  grid-cols-1 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
+            {filteredImages.length > 0 ? (
+              filteredImages.map((image, index) => (
                 <div
                   key={index}
-                  className="grid gap-2 justify-center w-fit border-4 relative border-black rounded-md">
-                  {image.visibility || userType === "AdminUser" ? (
+                  className="border-2 border-gray-600 rounded-md overflow-hidden relative">
+                  {(image.visibility || userType === "AdminUser") && (
                     <>
                       <Image
                         src={image.link.toString()}
                         alt={image.image.toString()}
-                        width={1500}
-                        height={1500}
-                        className="border-b-2 border-black shadow-sm object-cover w-[350px] h-[400px]"
+                        width={600}
+                        height={400}
+                        className="object-cover max-h-[600px]"
                       />
-                      <p className="text-center capitalize ">{image.image}</p>
-                      <div className="flex justify-evenly py-3 border-t-4  bottom-0 border-black">
+                      <p className="text-center p-2">{image.image}</p>
+                      <div className="flex justify-evenly py-3 border-t border-gray-600">
                         <button
                           className="text-blue-500 cursor-pointer"
                           onClick={() => download(image)}>
-                          <FaDownload size={30} />
+                          <FaDownload size={20} />
                         </button>
                         <button
                           className="text-blue-500 cursor-pointer"
-                          onClick={() => {
+                          onClick={() =>
                             window.open(
                               "https://imageuploaderfreakyab.vercel.app/getImage/" +
                                 image.id
-                            );
-                          }}>
-                          <CiShare2 size={30} />
+                            )
+                          }>
+                          <CiShare2 size={20} />
                         </button>
                         <button
                           className="text-blue-500 cursor-pointer"
@@ -170,31 +172,31 @@ function ViewImage() {
                             );
                             handleToast("Link copied to clipboard", "success");
                           }}>
-                          <CiLink size={30} />
+                          <CiLink size={20} />
                         </button>
                         <button
                           className="text-red-500 cursor-pointer"
                           onClick={() => handleDelete(image)}>
-                          <MdDelete size={30} />
+                          <MdDelete size={20} />
                         </button>
                         {userType === "AdminUser" && (
-                          <>
-                            <button
-                              className="cursor-pointer"
-                              onClick={() => handleVisiblity(image)}>
-                              {image.visibility ? (
-                                <FaRegEye size={30} />
-                              ) : (
-                                <FaRegEyeSlash size={30} />
-                              )}
-                            </button>
-                          </>
+                          <button
+                            className="cursor-pointer"
+                            onClick={() => handleVisibility(image)}>
+                            {image.visibility ? (
+                              <FaRegEye size={20} />
+                            ) : (
+                              <FaRegEyeSlash size={20} />
+                            )}
+                          </button>
                         )}
                       </div>
                     </>
-                  ) : null}
+                  )}
                 </div>
-              ) : null
+              ))
+            ) : (
+              <h1 className="text-black">No images found</h1>
             )}
           </div>
         </>
