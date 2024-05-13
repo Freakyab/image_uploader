@@ -131,23 +131,24 @@ function ViewImage() {
             />
           ) : null}
 
-          <div className="grid  grid-cols-1 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
             {filteredImages.length > 0 ? (
               filteredImages.map((image, index) => (
                 <div
                   key={index}
-                  className="border-2 border-gray-600 rounded-md overflow-hidden relative">
+                  className="border-2 h-fit border-t-gray-600 border-x-gray-600 border-b-white rounded-md overflow-hidden relative"
+                  style={{maxHeight : "600px"}}>
                   {(image.visibility || userType === "AdminUser") && (
                     <>
                       <Image
                         src={image.link.toString()}
                         alt={image.image.toString()}
                         width={600}
-                        height={400}
-                        className="object-cover max-h-[600px]"
+                        height={600}
+                        className="object-cover max-h-[500px]"
                       />
                       <p className="text-center p-2">{image.image}</p>
-                      <div className="flex justify-evenly py-3 border-t border-gray-600">
+                      <div className="flex justify-evenly py-3 border-y-2 border-gray-600">
                         <button
                           className="text-blue-500 cursor-pointer"
                           onClick={() => download(image)}>

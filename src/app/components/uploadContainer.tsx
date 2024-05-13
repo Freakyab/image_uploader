@@ -46,7 +46,7 @@ function UploadContainer() {
       setImageName("");
       setImage("");
     } else {
-      handleToast("Error uploading image", "error");
+      handleToast("Error uploading image \n image size should be less than 3mb", "error");
     }
     setImageUpload(false);
     console.timeEnd("image upload");
