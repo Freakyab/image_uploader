@@ -25,6 +25,7 @@ function ViewImage() {
   React.useEffect(() => {
     const type = localStorage.getItem("userTypeOfUploader");
     if (type) {
+      console.log("User type:", type);
       setUserType(type);
     }
   }, []);
@@ -94,18 +95,24 @@ function ViewImage() {
     }
   };
 
-  const handleVisiblity = async (file: imageProps) => {
-    if (file.id) {
-      setImagefetch(true);
-      const isVisibility = await changeVisibility(file.id, !file.visibility);
-      if (isVisibility) {
-        handleToast("visibility changed", "success");
-      } else {
-        handleToast("visibility not changed", "error");
-      }
+  const handleVisiblity = async (image: imageProps) => {
+    const id = image.id;
+    const visibility = image.visibility;
+    const success = await changeVisibility(id, !visibility);
+    if (success) {
+      const updatedImages = allImage.map((image) =>
+        image.id === id ? { ...image, visibility: !visibility } : image
+      );
+      setAllImage(updatedImages);
+      setFilteredImages(updatedImages);
+      handleToast(
+        `Image visibility ${visibility ? "hidden" : "restored"} successfully`,
+        "success"
+      );
+    } else {
+      handleToast("Failed to change image visibility", "error");
     }
-  }
-
+  };
   return (
     <div className="bg-white w-[90%] h-full p-4 rounded-lg shadow-xl">
       {imagefetch ? (
@@ -114,72 +121,80 @@ function ViewImage() {
         </h1>
       ) : (
         <>
-          <input
-            type="text"
-            placeholder="find the image by name"
-            onChange={handleSearch}
-            className="border-2 border-gray-300 p-2 rounded-md my-3"
-          />
+          {filteredImages.filter((image) => image.visibility).length > 0 ||
+          userType == "AdminUser" ? (
+            <input
+              type="text"
+              placeholder="find the image by name"
+              onChange={handleSearch}
+              className="border-2 border-gray-300 p-2 rounded-md my-3"
+            />
+          ) : null}
           <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-4 ">
-            {filteredImages.length > 0 ? (
+            {filteredImages.filter((image) => image.visibility).length > 0 ||
+            userType == "AdminUser" ? (
               filteredImages.map((image, index) => (
                 <div
                   key={index}
                   className="grid gap-2 justify-center w-fit border-4 relative border-black rounded-md">
-                  <Image
-                    src={image.link.toString()}
-                    alt={image.image.toString()}
-                    width={1500}
-                    height={1500}
-                    className="border-b-2 border-black shadow-sm object-cover w-[350px] h-[400px]"
-                  />
-                  <p className="text-center capitalize ">{image.image}</p>
-                  <div className="flex justify-evenly py-3 border-t-4  bottom-0 border-black">
-                    <button
-                      className="text-blue-500 cursor-pointer"
-                      onClick={() => download(image)}>
-                      <FaDownload size={30} />
-                    </button>
-                    <button
-                      className="text-blue-500 cursor-pointer"
-                      onClick={() => {
-                        window.open(
-                          "https://imageuploaderfreakyab.vercel.app/getImage/" +
-                            image.id
-                        );
-                      }}>
-                      <CiShare2 size={30} />
-                    </button>
-                    <button
-                      className="text-blue-500 cursor-pointer"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          "https://imageuploaderfreakyab.vercel.app/api/getImage/" +
-                            image.id
-                        );
-                        handleToast("Link copied to clipboard", "success");
-                      }}>
-                      <CiLink size={30} />
-                    </button>
-                    <button
-                      className="text-red-500 cursor-pointer"
-                      onClick={() => handleDelete(image)}>
-                      <MdDelete size={30} />
-                    </button>
-                    {userType === "AdminUser" && (
-                      <>
+                  {image.visibility || userType === "AdminUser" ? (
+                    <>
+                      <Image
+                        src={image.link.toString()}
+                        alt={image.image.toString()}
+                        width={1500}
+                        height={1500}
+                        className="border-b-2 border-black shadow-sm object-cover w-[350px] h-[400px]"
+                      />
+                      <p className="text-center capitalize ">{image.image}</p>
+                      <div className="flex justify-evenly py-3 border-t-4  bottom-0 border-black">
                         <button
-                          className="cursor-pointer"
-                          onClick={()=>handleVisiblity(image)}>
-                          {image.visibility ? (
-                            <FaRegEye size={30} />
-                          ) : (
-                            <FaRegEyeSlash size={30} />
-                          )}
+                          className="text-blue-500 cursor-pointer"
+                          onClick={() => download(image)}>
+                          <FaDownload size={30} />
                         </button>
-                      </>
-                    )}
-                  </div>
+                        <button
+                          className="text-blue-500 cursor-pointer"
+                          onClick={() => {
+                            window.open(
+                              "https://imageuploaderfreakyab.vercel.app/getImage/" +
+                                image.id
+                            );
+                          }}>
+                          <CiShare2 size={30} />
+                        </button>
+                        <button
+                          className="text-blue-500 cursor-pointer"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              "https://imageuploaderfreakyab.vercel.app/api/getImage/" +
+                                image.id
+                            );
+                            handleToast("Link copied to clipboard", "success");
+                          }}>
+                          <CiLink size={30} />
+                        </button>
+                        <button
+                          className="text-red-500 cursor-pointer"
+                          onClick={() => handleDelete(image)}>
+                          <MdDelete size={30} />
+                        </button>
+                        {userType === "AdminUser" && (
+                          <>
+                            <button
+                              className="cursor-pointer"
+                              onClick={() => handleVisiblity(image)}>
+                              {image.visibility ? (
+                                <FaRegEye size={30} />
+                              ) : (
+                                <FaRegEyeSlash size={30} />
+                              )}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               ))
             ) : (
