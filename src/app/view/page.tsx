@@ -10,7 +10,7 @@ function ViewImage() {
       try {
         setIsLoading(true);
         const res = await fetch(
-          "http://localhost:8000/getTotalSize"
+          "https://image-uploader-backend-opal.vercel.app/getTotalSize"
         );
         const data = await res.json();
 
@@ -21,7 +21,7 @@ function ViewImage() {
         for (const image of data.totalImages) {
           const id = image.id;
           const res = await fetch(
-            `http://localhost:8000/getAllChunks/${id}`
+            `https://image-uploader-backend-opal.vercel.app/getAllChunks/${id}`
           );
           const json = await res.json();
 

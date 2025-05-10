@@ -70,7 +70,7 @@ function UploadContainer() {
         console.log("Uploading chunk", i + 1, "of", imageData.length);
 
         const response = await fetch(
-          "http://localhost:8000/post",
+          "https://image-uploader-backend-opal.vercel.app/post",
           {
             method: "POST",
             headers: {
