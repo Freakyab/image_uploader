@@ -3,14 +3,17 @@ const client = require("../config");
 
 const ImageSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      required: true,
+    },
     id: {
       type: String,
       required: true,
     },
-
-    imageString: {
+    description: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {

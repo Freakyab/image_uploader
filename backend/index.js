@@ -1,13 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const Image = require("./models/image.model"); // Mongoose model
+const ImageDetails = require("./models/details.model"); // Mongoose model
 const app = express();
 
 const PORT = process.env.PORT || 8000;
 
 app.use(cors());
-app.use(express.json({ limit: '3mb' }));
-app.use(express.urlencoded({ extended: true, limit: '3mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.get("/", (_, res) => {
   res.status(200).json({
@@ -27,8 +28,11 @@ app.post("/post", async (req, res) => {
       });
     }
 
-    const image = new Image({ title, id, description, imageString });
+    const image = new Image({ id, imageString });
     await image.save();
+
+    const imageDetails = new ImageDetails({ title, id, description });
+    await imageDetails.save();
 
     return res.status(200).json({
       message: "Image saved successfully",
@@ -69,7 +73,7 @@ app.get("/getTotalSize", async (_, res) => {
 app.get("/getImages/:chunkNo/:id", async (req, res) => {
   try {
     const { chunkNo, id } = req.params;
-    console.log(chunkNo, id);
+
     if (!chunkNo || !id) {
       return res.status(400).json({ message: "Please provide chunkNo and id", status: false });
     }
@@ -85,6 +89,7 @@ app.get("/getImages/:chunkNo/:id", async (req, res) => {
       status: true,
       image: images[chunkNo],
     });
+
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ message: "Internal server error", status: false });
