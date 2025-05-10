@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const client = require("../config");
 
-const ImageSchema = new mongoose.Schema(
+const ImageDetailsSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -21,5 +21,5 @@ const ImageSchema = new mongoose.Schema(
   }
 );
 
-const Image = client.model("Image", ImageSchema);
-module.exports = Image;
+const ImageDetails = client.model("ImageDetails", ImageDetailsSchema);
+module.exports = ImageDetails;

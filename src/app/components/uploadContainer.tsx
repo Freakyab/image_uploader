@@ -4,18 +4,19 @@ import React, { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import Image from "next/image";
 import { limit } from "../limit";
+import { useRouter } from "next/navigation";
 
 function UploadContainer() {
   const [imageName, setImageName] = useState("");
   const [imageUpload, setImageUpload] = useState(false);
   const [image, setImage] = useState("");
   const [percentUploaded, setPercentUploaded] = useState(0);
+  const router = useRouter();
 
   const handleFileUpload = async (file: File) => {
     if (imageName === "") setImageName(file.name);
     const base64 = (await convertToBase64(file)) as string;
     setImage(base64);
-    console.timeEnd("file conversion");
   };
 
   const convertToBase64 = (file: File) => {
@@ -55,6 +56,7 @@ function UploadContainer() {
           imageString: chunk,
           title: imageName,
           id: id,
+          size: (chunk.length * 3) / 4 / (1024 * 1024) 
         });
       }
 
@@ -63,23 +65,34 @@ function UploadContainer() {
         //calculate the total size of the image
         const totalSize = data.imageString.length;
         console.log("Total size of the image:", totalSize / 1024 / 1024, "MB");
-        setPercentUploaded(
-          Math.floor(((i + 1) / imageData.length) * 100)
-        );
+        const percentage = Math.floor(((i + 1) / imageData.length) * 100);
+        setPercentUploaded(percentage);
         console.log("Uploading chunk", i + 1, "of", imageData.length);
 
-        const response = await fetch("https://image-uploader-backend-opal.vercel.app/post", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+        const response = await fetch(
+          "http://localhost:8000/post",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
         const result = await response.json();
         console.log(result);
       }
+
+      if (percentUploaded >= 100) {
+        router.push("/view");
+      }
     } catch (err) {
       console.log(err);
+    } finally {
+      setImageUpload(false);
+      setImage("");
+      setImageName("");
+      setPercentUploaded(0);
     }
   };
 
@@ -98,7 +111,6 @@ function UploadContainer() {
       className="bg-white w-full md:w-[90%] h-full flex flex-col justify-center items-center p-4 rounded-lg shadow-xl"
       onDrop={handleDrop}
       onDragOver={handleDragOver}>
-
       {percentUploaded > 0 && (
         <div className="w-full md:w-[80%] bg-gray-200 rounded-lg mt-4">
           <div

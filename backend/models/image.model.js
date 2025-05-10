@@ -7,14 +7,14 @@ const ImageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
     imageString: {
       type: String,
       required: true,
     },
-  },
-  {
-    timestamps: true,
+    size : {
+      type: Number,
+      required: true,
+    },
   }
 );
 
