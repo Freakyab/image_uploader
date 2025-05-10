@@ -1,18 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { ImageUploadFile } from "@/app/actions/uploader";
 import { ToastContainer } from "react-toastify";
-import { handleToast } from "./HandleToast";
 import Image from "next/image";
+import { limit } from "../limit";
 
 function UploadContainer() {
   const [imageName, setImageName] = useState("");
   const [imageUpload, setImageUpload] = useState(false);
   const [image, setImage] = useState("");
+  const [percentUploaded, setPercentUploaded] = useState(0);
 
   const handleFileUpload = async (file: File) => {
-    console.time("file conversion");
     if (imageName === "") setImageName(file.name);
     const base64 = (await convertToBase64(file)) as string;
     setImage(base64);
@@ -32,24 +31,56 @@ function UploadContainer() {
     });
   };
 
-  const handleSubmit = async () => {
-    console.time("image upload");
-    setImageUpload(true);
-    if (!imageName) {
-      handleToast("Please enter the image name", "error");
-      setImageUpload(false);
-      return;
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      setImageUpload(true);
+      const base64 = image;
+
+      // if the total size of the image is greater than 4MB, divide it into 4MB chunks
+      const chunkSize = limit; // 4MB
+      const chunks = [];
+
+      for (let i = 0; i < base64.length; i += chunkSize) {
+        chunks.push(base64.slice(i, i + chunkSize));
+      }
+
+      let imageData = [];
+      const id = Math.floor(Math.random() * 100000000);
+
+      for (let i = 0; i < chunks.length; i++) {
+        console.log("Chunk", i + 1, "of", chunks.length);
+        const chunk = chunks[i];
+        imageData.push({
+          imageString: chunk,
+          title: imageName,
+          id: id,
+        });
+      }
+
+      for (let i = 0; i < imageData.length; i++) {
+        const data = imageData[i];
+        //calculate the total size of the image
+        const totalSize = data.imageString.length;
+        console.log("Total size of the image:", totalSize / 1024 / 1024, "MB");
+        setPercentUploaded(
+          Math.floor(((i + 1) / imageData.length) * 100)
+        );
+        console.log("Uploading chunk", i + 1, "of", imageData.length);
+
+        const response = await fetch("http://localhost:8000/post", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        console.log(result);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    const res = await ImageUploadFile(image, imageName);
-    if (res) {
-      handleToast("Image uploaded successfully", "success");
-      setImageName("");
-      setImage("");
-    } else {
-      handleToast("Error uploading image \n image size should be less than 3mb", "error");
-    }
-    setImageUpload(false);
-    console.timeEnd("image upload");
   };
 
   const handleDrop = async (e: any) => {
@@ -66,8 +97,18 @@ function UploadContainer() {
     <div
       className="bg-white w-full md:w-[90%] h-full flex flex-col justify-center items-center p-4 rounded-lg shadow-xl"
       onDrop={handleDrop}
-      onDragOver={handleDragOver}
-    >
+      onDragOver={handleDragOver}>
+
+      {percentUploaded > 0 && (
+        <div className="w-full md:w-[80%] bg-gray-200 rounded-lg mt-4">
+          <div
+            className="bg-blue-500 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-l-lg"
+            style={{ width: `${percentUploaded}%` }}>
+            {percentUploaded}%
+          </div>
+        </div>
+      )}
+
       {imageUpload ? (
         <h1>Image loading....</h1>
       ) : (
@@ -77,15 +118,13 @@ function UploadContainer() {
               <div
                 className="w-full md:w-[80%] border-2 border-dashed border-gray-300 p-4 rounded-lg"
                 onDrop={handleDrop}
-                onDragOver={handleDragOver}
-              >
+                onDragOver={handleDragOver}>
                 <p className="text-center">Drag & drop your image here</p>
               </div>
               <p className="text-center mt-4">Or</p>
               <label
                 htmlFor="input-image"
-                className="w-full md:w-[80%] flex justify-center items-center mt-4 rounded-lg"
-              >
+                className="w-full md:w-[80%] flex justify-center items-center mt-4 rounded-lg">
                 <input
                   type="file"
                   onChange={(e) =>
@@ -122,21 +161,21 @@ function UploadContainer() {
                 accept=".png, .jpg, .jpeg"
               />
 
-              {imageName && <button
-                className="bg-red-500 text-white px-3 py-2 rounded-lg"
-                onClick={() => {
-                  setImage("");
-                  setImageName("");
-                }}
-              >
-                X
-              </button>}
+              {imageName && (
+                <button
+                  className="bg-red-500 text-white px-3 py-2 rounded-lg"
+                  onClick={() => {
+                    setImage("");
+                    setImageName("");
+                  }}>
+                  X
+                </button>
+              )}
             </div>
           </div>
           <button
             className="bg-blue-500 text-white p-2 px-3 rounded-lg mt-4 capitalize"
-            onClick={handleSubmit}
-          >
+            onClick={handleSubmit}>
             upload
           </button>
         </>
