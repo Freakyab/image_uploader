@@ -4,7 +4,7 @@ import { limit } from "../limit";
 function ViewImage() {
   React.useEffect(() => {
     const fetchTotalImagesSize = async () => {
-      const response = await fetch("http://localhost:8000/getTotalSize");
+      const response = await fetch("https://image-uploader-backend-opal.vercel.app/getTotalSize");
       const data = await response.json();
       if(data.status){
         console.log("Total size of the images:", data.totalSizeInMB, "MB");
