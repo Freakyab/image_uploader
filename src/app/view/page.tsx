@@ -62,6 +62,7 @@
 // export default ViewImage;
 
 "use client";
+
 import React, { useEffect, useState } from "react";
 
 function ViewImage() {
